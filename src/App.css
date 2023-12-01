@@ -1,0 +1,38 @@
+/* HomePage.css */
+.image-container {
+    /* position: relative; */
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .project-image {
+    transition: filter 0.3s ease-in-out;
+    filter: brightness(80%);
+  }
+  
+  .overlay {
+    
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .project-title {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateY(100%);
+  
+  }
+  .image-container:hover .project-image {
+    /* filter: blur(5px); */
+    filter: brightness(40%);
+  }
+  
+  .image-container:hover .overlay {
+    opacity: 1;
+  }
+  
+  .image-container:hover .project-title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
