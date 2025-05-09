@@ -39,7 +39,9 @@ const AboutPage: React.FC<AboutPageProps> = ({ themeMode }) => {
                         this.name = '${data.Biodata?.name || "Unknown"}';
                         this.dateOfBirth = '${data.Biodata?.date || "Unknown"}';
                         this.email = '${data.Biodata?.email || "Unknown"}';
-                        this.phoneNumber = '${data.Biodata?.phone_number || "Unknown"}';
+                        this.phoneNumber = '${
+                          data.Biodata?.phone_number || "Unknown"
+                        }';
                       }
 
                       workExperience() {
@@ -83,7 +85,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ themeMode }) => {
 
             let index = 0;
             const typingInterval = setInterval(() => {
-              if (index < fullText.length -1) {
+              if (index < fullText.length - 1) {
                 setTypedText((prev) => prev + fullText[index]);
                 index++;
               } else {

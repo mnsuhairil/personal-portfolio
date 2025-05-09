@@ -22,7 +22,7 @@ to get a glimpse of my skills and the projects I've brought to life.`;
     if (!hasAnimated) {
       let index = 0;
       const typingInterval = setInterval(() => {
-        if (index < fullText.length -1) {
+        if (index < fullText.length - 1) {
           setTypedText((prev) => prev + fullText[index]);
           index++;
         } else {
@@ -72,7 +72,12 @@ to get a glimpse of my skills and the projects I've brought to life.`;
           <img
             src={suimage}
             alt="Portfolio"
-            style={{ width: "100%", height: "auto", display: "block", margin: "0 auto" }}
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+              margin: "0 auto",
+            }}
           />
         </Grid>
       </Grid>

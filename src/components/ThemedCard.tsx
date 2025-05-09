@@ -3,10 +3,9 @@ import React from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import theme from "./../themes/theme";
 
-
 interface ThemedCardProps {
-    themeMode: "dark" | "light";
-  }
+  themeMode: "dark" | "light";
+}
 
 const ThemedCard = ({ themeMode }) => {
   const currentTheme = theme[themeMode];
