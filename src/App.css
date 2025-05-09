@@ -36,3 +36,15 @@
     transform: translateY(0);
   }
   
+  .image-animation {
+  opacity: 0;
+  transform: translateY(50px); /* Start 50px below */
+  animation: moveUp 1s ease-out forwards; /* Move up with animation */
+}
+
+@keyframes moveUp {
+  to {
+    opacity: 1;
+    transform: translateY(0); /* End at the original position */
+  }
+}

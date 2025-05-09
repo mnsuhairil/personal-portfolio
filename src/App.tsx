@@ -15,7 +15,6 @@ import {
 } from "@mui/lab";
 import ProjectPage from "./views/Project";
 import AboutPage from "./views/About";
-
 const App: React.FC = () => {
   const themeMode = "dark";
 

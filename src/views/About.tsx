@@ -1,212 +1,127 @@
-// HomePage.tsx
-import { Container, Grid, Paper, Typography } from "@mui/material";
-import React from "react";
+import { Container } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { getDatabase, ref, onValue } from "firebase/database";
+import app from "../firebase"; // Import the initialized Firebase app
 import theme from "../themes/theme";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; // VS Code dark theme
 
 interface AboutPageProps {
   themeMode: "dark" | "light";
 }
 
 const AboutPage: React.FC<AboutPageProps> = ({ themeMode }) => {
-  const pageStyle = {
+  const [typedText, setTypedText] = useState("");
+  const [data, setData] = useState<any>(null);
+  const [hasAnimated, setHasAnimated] = useState(false); // To ensure animation runs only once
+  const aboutRef = useRef<HTMLDivElement>(null); // Reference to the About section
+
+  useEffect(() => {
+    // Fetch data from Firebase Realtime Database
+    const db = getDatabase(app); // Use the initialized Firebase app
+    const dataRef = ref(db, "personalAppDatabase/portfolio_web_data");
+    onValue(dataRef, (snapshot) => {
+      const fetchedData = snapshot.val();
+      setData(fetchedData);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (data && !hasAnimated) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            // Trigger animation when the About section is visible
+            const fullText = `
+                    class AboutMe {
+                      biographical() {
+                        this.name = '${data.Biodata?.name || "Unknown"}';
+                        this.dateOfBirth = '${data.Biodata?.date || "Unknown"}';
+                        this.email = '${data.Biodata?.email || "Unknown"}';
+                        this.phoneNumber = '${data.Biodata?.phone_number || "Unknown"}';
+                      }
+
+                      workExperience() {
+                        return [
+                          ${Object.values(data.work_experiences || [])
+                            .map(
+                              (exp: any) => `{
+                            company: '${exp.company_name || "Unknown"}',
+                            position: '${exp.position || "Unknown"}',
+                            startDate: '${exp.start_date || "Unknown"}',
+                            endDate: '${exp.end_date || "Unknown"}'
+                          }`
+                            )
+                            .join(",\n      ")}
+                        ];
+                      }
+
+                      education() {
+                        return [
+                          ${Object.values(data.educations || [])
+                            .map(
+                              (edu: any) => `{
+                            school: '${edu.school_name || "Unknown"}',
+                            course: '${edu.course || "Unknown"}',
+                            startYear: '${edu.start_year || "Unknown"}',
+                            endYear: '${edu.end_year || "Unknown"}'
+                          }`
+                            )
+                            .join(",\n      ")}
+                        ];
+                      }
+
+                      skills() {
+                        return [
+                          ${Object.values(data.skills || [])
+                            .map((skill: any) => `'${skill}'`)
+                            .join(", ")}
+                        ];
+                      }
+                    }`;
+
+            let index = 0;
+            const typingInterval = setInterval(() => {
+              if (index < fullText.length -1) {
+                setTypedText((prev) => prev + fullText[index]);
+                index++;
+              } else {
+                clearInterval(typingInterval);
+                setHasAnimated(true); // Mark animation as completed
+              }
+            }, 20);
+            observer.disconnect(); // Stop observing once animation starts
+          }
+        },
+        { threshold: 0.5 } // Trigger when 50% of the section is visible
+      );
+
+      if (aboutRef.current) {
+        observer.observe(aboutRef.current);
+      }
+
+      return () => observer.disconnect();
+    }
+  }, [data, hasAnimated]);
+
+  const pageStyle: React.CSSProperties = {
     paddingTop: "20px",
-    minHeight: "91.5vh",
-    minWeight: "100%",
-    // textAlign: "center",
     color: theme[themeMode].custom.text,
-  };
-
-  const workExperienceData = [
-    { period: "2020-now", position: "Full-stack Developer/Owner at Pixel Lab" },
-    {
-      period: "2023-now",
-      position: "Solutions Architect at Digitree Group S.A.",
-    },
-    {
-      period: "2017-2023",
-      position: "Full-stack Developer at Digitree Group S.A.",
-    },
-    {
-      period: "2013-2017",
-      position: "Full-Stack Designer at Digitree Group S.A.",
-    },
-    {
-      period: "2006-now",
-      position: "Full-Stack Designer/developer at Yasio.dev",
-    },
-  ];
-  const educationData = [
-    {
-      period: "2012-2014",
-      description: "school 1",
-    },
-    {
-      period: "2008-2012",
-      description: "school 2",
-    },
-  ];
-
-  const skillsData = [
-    "HTML/CSS/JS",
-    "Vue",
-    "Node.js",
-    "Redis/NATS/RabbitMQ",
-    "Bootstrap/Tailwind",
-    "Webpack/Gulp/Vite",
-    "SCSS/Less",
-    "npm/yarn/pnpm",
-    "Docker/k8s",
-    "PWA",
-    "SSR",
-    "SPA",
-    "GIT/CVS",
-    "Cordova",
-    "NativeScript",
-    "Electron",
-    "Web-extensions",
-    "Web Sockets",
-    "Firebase",
-    "RWD/W3C/ARIA/WCAG",
-    "XSLT/Smarty/Twig",
-    "PHP",
-    "MySQL/MongoDB/ORM",
-    "Wordpress",
-    "Photoshop",
-    "Illustrator",
-    "After Effects",
-    "Premiere",
-    "Motion design",
-    "UX/UI",
-    "DTP",
-    "AWS",
-    "GCP",
-    "C#",
-    "Unity",
-    "TypeScript",
-    "NestJS",
-    "Cypress",
-    "Jest",
-    "Nuxt",
-    "Quasar",
-  ];
-
-  const maxSkillsPerLine = 7;
-
-  const cls = {
-    color: "#55d9be",
-  };
-
-  const txt = {
-    color: "#d9a855",
-  };
-
-  const vrb = {
-    color: "#569cd6",
-  };
-
-  const sbl = {
-    color: "#d16969",
-  };
-
-  const typ = {
-    color: "#44b39c",
-  };
-
-  const num = {
-    color: "#fcffb3",
-  };
-
-  const rtn = {
-    color: "#ca63d4",
+    fontFamily: "monospace",
+    whiteSpace: "pre-wrap",
+    wordWrap: "break-word",
   };
 
   return (
-    <Container style={pageStyle}>
-      <Typography>
-        <span style={typ}>class</span> <span style={cls}>AboutMe</span>{" "}
-        <span>&#123;</span>
-        <br />
-      </Typography>
-      <Typography>
-        &nbsp;&nbsp;&nbsp;<span style={cls}>biographical()</span>
-        <span>&#123;</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style={sbl}>this</span>.
-        <span style={vrb}>name</span> ={" "}
-        <span style={txt}>'Muhammad Nur Suhairil'</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style={sbl}>this</span>.
-        <span style={vrb}>dateOfBirth</span> = <span style={num}>02022000</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style={sbl}>this</span>.
-        <span style={vrb}>email</span> ={" "}
-        <span style={txt}>'mnsuhairil@gmail.com'</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&#125;
-      </Typography>
-      <Typography>
-        <span style={cls}>workExperience()</span> &#123;
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>return (</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>[</span>
-        <br />
-        {workExperienceData.map((experience, index) => (
-          <React.Fragment key={index}>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#123;
-            <span style={txt}> '{experience.period}'</span> :{" "}
-            <span style={txt}>'{experience.position}'</span> &#125;,
-            <br />
-          </React.Fragment>
-        ))}
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>]</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>);</span>
-        <br />
-      </Typography>
-      <Typography>
-        <span style={cls}>education()</span> &#123;
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;return (
-        <br />
-        {educationData.map((edu, index) => (
-          <React.Fragment key={index}>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#123;{" "}
-            <span style={txt}>'{edu.period}'</span> :{" "}
-            <span style={txt}>'{edu.description}'</span> &#125;,
-            <br />
-          </React.Fragment>
-        ))}
-        &nbsp;&nbsp;&nbsp;&nbsp;);
-        <br />
-      </Typography>
-      <Typography>
-        <span style={cls}>skills()</span> &#123;
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>return (</span>
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        {skillsData.map((skill, index) => (
-          <React.Fragment key={index}>
-            {index > 0 && index % 11 === 0 ? (
-              <>
-                <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </>
-            ) : null}
-
-            <span style={txt}>'{skill}'</span>
-            {index !== skillsData.length - 1 ? "," : ""}
-          </React.Fragment>
-        ))}{" "}
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        <br />
-        &nbsp;&nbsp;&nbsp;&nbsp;<span style={rtn}>);</span>
-        <br />
-      </Typography>
+    <Container ref={aboutRef} style={pageStyle}>
+      {typedText ? (
+        <SyntaxHighlighter language="javascript" style={vscDarkPlus}>
+          {typedText}
+        </SyntaxHighlighter>
+      ) : (
+        "Loading..."
+      )}
     </Container>
   );
 };
