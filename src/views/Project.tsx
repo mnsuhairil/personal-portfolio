@@ -1,6 +1,5 @@
-// HomePage.tsx
-import { Container, Grid, Paper, Typography } from "@mui/material";
-import React from "react";
+import { Container, Grid, Typography } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import theme from "../themes/theme";
 
 interface HomePageProps {
@@ -8,12 +7,46 @@ interface HomePageProps {
 }
 
 const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
+  const [visibleItems, setVisibleItems] = useState<number[]>([]); // Track visible items
+  const projectRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for each project
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = Number(entry.target.getAttribute("data-index"));
+          if (entry.isIntersecting) {
+            setVisibleItems((prev) => [...new Set([...prev, index])]); // Add visible item
+          }
+        });
+      },
+      { threshold: 0.5 } // Trigger when 50% of the item is visible
+    );
+
+    projectRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect(); // Cleanup observer on unmount
+  }, []);
+
   const pageStyle = {
     paddingTop: "50px",
     minHeight: "91.5vh",
     minWeight: "100%",
-    // textAlign: "center",
     color: theme[themeMode].custom.text,
+  };
+
+  const hiddenStyle = {
+    opacity: 0,
+    transform: "translateX(100px)", // Start 100px to the right
+    transition: "opacity 1s ease-out, transform 1s ease-out", // Smooth transition
+  };
+
+  const visibleStyle = {
+    opacity: 1,
+    transform: "translateX(0)", // Move to the original position
+    transition: "opacity 1s ease-out, transform 1s ease-out", // Smooth transition
   };
 
   const items = Array.from({ length: 6 }, (_, index) => index + 1);
@@ -21,7 +54,7 @@ const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
   return (
     <Container style={pageStyle}>
       <Grid container columnSpacing={10} rowSpacing={5}>
-        {items.map((item) => (
+        {items.map((item, index) => (
           <Grid
             item
             key={item}
@@ -29,12 +62,17 @@ const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
             sm={12}
             md={6}
             lg={6}
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              ...(visibleItems.includes(index) ? visibleStyle : hiddenStyle), // Apply animation styles
+            }}
+            ref={(el) => (projectRefs.current[index] = el)} // Assign ref to each project
+            data-index={index} // Add index for tracking
+            className="image-container" // Keep hover animation class
           >
             <div className="image-container">
               <img
                 className="project-image"
-                // src={`/src/assets/project-image-${item}.png`}
                 src={`/src/assets/project-image-2.png`}
                 alt={`Image ${item}`}
                 style={{
@@ -70,10 +108,9 @@ const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
                     borderBottom: "2px solid",
                     borderColor: "yellow",
                     padding: "1em",
-                    // background: `rgba(0, 0, 0,0.5)`,
                   }}
                 >
-                  Bus Locator Mobile App {item}
+                  Project Title {item}
                 </Typography>
               </div>
             </div>
