@@ -12,9 +12,10 @@ import theme from "./../themes/theme";
 
 interface HeaderProps {
   themeMode: "dark" | "light";
+  onNavigate: (section: string) => void; // Function to handle navigation
 }
 
-const Header: React.FC<HeaderProps> = ({ themeMode }) => {
+const Header: React.FC<HeaderProps> = ({ themeMode, onNavigate }) => {
   const appBarStyle = {
     background: theme[themeMode].custom.primary,
     color: theme[themeMode].custom.text,
@@ -81,13 +82,13 @@ const Header: React.FC<HeaderProps> = ({ themeMode }) => {
           </Typography>
           {/* Hide on small screens */}
           <Hidden smDown>
-            <Button>Home</Button>
+            <Button onClick={() => onNavigate("home")}>Home</Button>
             <span>{" />"}</span>
-            <Button>Projects</Button>
+            <Button onClick={() => onNavigate("projects")}>Projects</Button>
             <span>{" />"}</span>
-            <Button>About</Button>
+            <Button onClick={() => onNavigate("about")}>About</Button>
             <span>{" />"}</span>
-            <Button>Contact</Button>
+            <Button onClick={() => onNavigate("contact")}>Contact</Button>
             <span>{" />"}</span>
           </Hidden>
           {/* Show on small screens */}
