@@ -1,92 +1,180 @@
-import { Container, Grid, Typography } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
+import { getDatabase, ref, onValue } from "firebase/database";
 import theme from "../themes/theme";
+import app from "../firebase";
 
-interface HomePageProps {
+interface ProjectPageProps {
   themeMode: "dark" | "light";
 }
 
-const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
-  const [visibleItems, setVisibleItems] = useState<number[]>([]); // Track visible items
-  const projectRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for each project
+interface Project {
+  name: string;
+  description: string;
+  priority: number;
+  images: string[];
+  repository_link: string;
+  youtube_link: string;
+  timeline: { start: string; end: string };
+}
+
+const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [visibleItems, setVisibleItems] = useState<number[]>([]);
+  const [topProjects, setTopProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(muiTheme.breakpoints.between("sm", "md"));
 
   useEffect(() => {
+    const db = getDatabase(app);
+    const projectsRef = ref(db, "personalAppDatabase/projects");
+    onValue(projectsRef, (snapshot) => {
+      const data = snapshot.val();
+      const projectArray: Project[] = Object.values(data).map(
+        (project: any) => ({
+          name: project.name,
+          description: project.description,
+          priority: project.priority,
+          images: project.images || [],
+          repository_link: project.repository_link,
+          youtube_link: project.youtube_link,
+          timeline: project.timeline,
+        })
+      );
+
+      projectArray.sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return a.name.localeCompare(b.name);
+      });
+
+      setProjects(projectArray);
+      setTopProjects(projectArray.slice(0, 6));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (topProjects.length === 0) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const index = Number(entry.target.getAttribute("data-index"));
           if (entry.isIntersecting) {
-            setVisibleItems((prev) => [...new Set([...prev, index])]); // Add visible item
+            setVisibleItems((prev) => [...new Set([...prev, index])]);
           }
         });
       },
-      { threshold: 0.5 } // Trigger when 50% of the item is visible
+      { threshold: 0.5 }
     );
 
     projectRefs.current.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
-    return () => observer.disconnect(); // Cleanup observer on unmount
-  }, []);
+    return () => observer.disconnect();
+  }, [topProjects]);
 
   const pageStyle = {
-    paddingTop: "50px",
-    minHeight: "91.5vh",
-    minWeight: "100%",
+    paddingTop: isMobile ? "20px" : "50px",
+    paddingBottom: isMobile ? "20px" : "50px",
+    color: theme[themeMode].custom.text,
+    width: "100%",
+    boxSizing: "border-box" as const,
+  };
+  const buttonStyle = {
+    textAlign: "center", 
+    marginTop: isMobile ? "16px" : "30px",
+    backgroundColor: theme[themeMode].custom.primary,
     color: theme[themeMode].custom.text,
   };
 
   const hiddenStyle = {
     opacity: 0,
-    transform: "translateX(100px)", // Start 100px to the right
-    transition: "opacity 1s ease-out, transform 1s ease-out", // Smooth transition
+    transform: "translateX(100px)",
+    transition: "opacity 1s ease-out, transform 1s ease-out",
   };
 
   const visibleStyle = {
     opacity: 1,
-    transform: "translateX(0)", // Move to the original position
-    transition: "opacity 1s ease-out, transform 1s ease-out", // Smooth transition
+    transform: "translateX(0)",
+    transition: "opacity 1s ease-out, transform 1s ease-out",
   };
 
-  const items = Array.from({ length: 6 }, (_, index) => index + 1);
+  const handleViewMore = () => {
+    window.location.href = "/projects";
+  };
+
+  const handleProjectClick = (project: Project) => {
+    setSelectedProject(project);
+  };
+
+  const handleClosePopup = () => {
+    setSelectedProject(null);
+  };
 
   return (
-    <Container style={pageStyle}>
-      <Grid container columnSpacing={10} rowSpacing={5}>
-        {items.map((item, index) => (
+    <Container style={pageStyle} maxWidth="lg">
+      <Grid
+        container
+        columnSpacing={isMobile ? 2 : isTablet ? 5 : 10}
+        rowSpacing={isMobile ? 2 : 5}
+      >
+        {topProjects.map((project, index) => (
           <Grid
             item
-            key={item}
+            key={project.name}
             xs={12}
             sm={12}
             md={6}
             lg={6}
             style={{
               position: "relative",
-              ...(visibleItems.includes(index) ? visibleStyle : hiddenStyle), // Apply animation styles
+              ...(visibleItems.includes(index) ? visibleStyle : hiddenStyle),
+              cursor: "pointer",
             }}
-            ref={(el) => (projectRefs.current[index] = el)} // Assign ref to each project
-            data-index={index} // Add index for tracking
-            className="image-container" // Keep hover animation class
+            ref={(el) => (projectRefs.current[index] = el)}
+            data-index={index}
+            className="image-container"
+            onClick={() => handleProjectClick(project)}
           >
-            <div className="image-container">
+            <div className="image-container" style={{ width: "100%" }}>
               <img
                 className="project-image"
-                src={`/src/assets/project-image-2.png`}
-                alt={`Image ${item}`}
+                src={
+                  project.images[0] || "/src/assets/default-project-image.png"
+                }
+                alt={project.name}
                 style={{
                   borderRadius: 20,
                   width: "100%",
-                  height: "auto",
+                  height: isMobile ? "25vh" : isTablet ? "28vh" : "30vh",
+                  minHeight: 120,
+                  objectFit: "cover",
+                  display: "block",
+                  margin: "0 auto",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                 }}
               />
               <div
                 className="overlay"
                 style={{
                   position: "absolute",
-                  top: "40%",
-                  left: "6%",
+                  top: isMobile ? "35%" : "40%",
+                  left: isMobile ? "0%" : "6%",
                   right: 0,
                   bottom: 0,
                   display: "flex",
@@ -94,6 +182,7 @@ const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
                   justifyContent: "center",
                   alignItems: "flex-start",
                   zIndex: 1,
+                  width: isMobile ? "80%" : "auto",
                 }}
               >
                 <Typography
@@ -101,22 +190,137 @@ const ProjectPage: React.FC<HomePageProps> = ({ themeMode }) => {
                   style={{
                     zIndex: 1,
                     color: "#ffffff",
-                    fontSize: "1.5rem",
+                    fontSize: isMobile ? "1rem" : "1.5rem",
                     fontWeight: 600,
-                    maxWidth: "8em",
+                    maxWidth: isMobile ? "90vw" : "8em",
                     borderLeft: "2px solid",
                     borderBottom: "2px solid",
                     borderColor: "yellow",
-                    padding: "1em",
+                    padding: isMobile ? "0.5em" : "1em",
+                    borderRadius: "0 0 5px 5px",
                   }}
                 >
-                  Project Title {item}
+                  {project.name}
                 </Typography>
               </div>
             </div>
           </Grid>
         ))}
       </Grid>
+        <Button
+          style={buttonStyle as React.CSSProperties}
+          variant="contained"
+          sx={{
+            width: "50%",
+            marginTop: isMobile ? "20px" : "30px",
+            marginBottom: isMobile ? "20px" : "30px",
+            backgroundColor: theme[themeMode].custom.primary,
+            color: theme[themeMode].custom.text,
+            display: "block",
+            margin: "auto",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor =
+              theme[themeMode].custom.secondary;
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor =
+              theme[themeMode].custom.primary;
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.backgroundColor =
+              theme[themeMode].custom.secondary;
+          }
+          }
+          onBlur={(e) => {
+            e.currentTarget.style.backgroundColor =
+              theme[themeMode].custom.primary;
+          }
+          }
+          onClick={(e) => {
+            e.preventDefault();
+            handleViewMore();
+          }}
+     
+
+          
+        >
+          View More
+        </Button>
+
+      {selectedProject && (
+        <Dialog
+          open={!!selectedProject}
+          onClose={handleClosePopup}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            style: {
+              width: isMobile ? "98vw" : undefined,
+              margin: isMobile ? 4 : undefined,
+            },
+          }}
+        >
+          <DialogTitle>{selectedProject.name}</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              {selectedProject.description}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Priority:</strong> {selectedProject.priority}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Timeline:</strong> {selectedProject.timeline.start} -{" "}
+              {selectedProject.timeline.end}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Repository:</strong>{" "}
+              <a
+                href={selectedProject.repository_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ wordBreak: "break-all" }}
+              >
+                {selectedProject.repository_link}
+              </a>
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>YouTube:</strong>{" "}
+              <a
+                href={selectedProject.youtube_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ wordBreak: "break-all" }}
+              >
+                {selectedProject.youtube_link}
+              </a>
+            </Typography>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginTop: "20px",
+                justifyContent: isMobile ? "center" : "flex-start",
+              }}
+            >
+              {selectedProject.images.map((image, idx) => (
+                <img
+                  key={idx}
+                  src={image}
+                  alt={`Project ${selectedProject.name} Image ${idx + 1}`}
+                  style={{
+                    width: isMobile ? "80px" : "100px",
+                    height: isMobile ? "80px" : "100px",
+                    borderRadius: "10px",
+                    objectFit: "cover",
+                  }}
+                />
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Container>
   );
 };

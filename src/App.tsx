@@ -41,6 +41,9 @@ const App: React.FC = () => {
     fontFamily: "Arial, sans-serif",
     backgroundColor: theme[themeMode].custom.background,
     color: theme[themeMode].custom.text,
+    overflowX: "hidden",
+    width: "100%",
+    
   };
 
   const timelineTextStyle = {
@@ -52,17 +55,17 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={appStyle}>
+    <div style={appStyle as React.CSSProperties}>
       <Header themeMode={themeMode} onNavigate={handleNavigate} />
       <Timeline
         sx={{
           [`& .${timelineItemClasses.root}:before`]: {
             flex: 0,
-            padding: { sx: "0", sm: "3rem", md: "6rem" },
+            padding: { xs: "0", sm: "3rem", md: "6rem" },
           },
         }}
       >
-        <TimelineItem>
+        <TimelineItem >
           <TimelineSeparator>
             <TimelineDot sx={TimelineConnectorStyle} />
             <TimelineConnector sx={TimelineConnectorStyle} />
