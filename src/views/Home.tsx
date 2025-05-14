@@ -83,7 +83,7 @@ const HomePage: React.FC<HomePageProps> = ({ themeMode }) => {
           <Typography variant="body1" paragraph textAlign={"justify"}>
             {typedText || "Loading..."}
           </Typography>
-          <Button variant="contained" style={buttonStyle}>
+          <Button variant="contained" style={buttonStyle} onClick={() => window.location.href = "/all-projects"}>
             View Projects
           </Button>
         </Grid>
