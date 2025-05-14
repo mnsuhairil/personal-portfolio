@@ -114,9 +114,9 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
     transition: "opacity 1s ease-out, transform 1s ease-out",
   };
 
-  const handleViewMore = () => {
-    window.location.href = "/projects";
-  };
+const handleViewMore = () => {
+  window.location.href = "/all-projects";
+};
 
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project);
