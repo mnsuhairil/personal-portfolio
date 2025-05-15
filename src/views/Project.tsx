@@ -3,9 +3,6 @@ import {
   Grid,
   Typography,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -13,6 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import theme from "../themes/theme";
 import app from "../firebase";
+import AllProjectsPage from "./AllProjectsPage"; // Import the dialog logic
 
 interface ProjectPageProps {
   themeMode: "dark" | "light";
@@ -29,10 +27,12 @@ interface Project {
 }
 
 const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [, setProjects] = useState<Project[]>([]);
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const [topProjects, setTopProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogProject, setDialogProject] = useState<Project | null>(null);
   const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const muiTheme = useTheme();
@@ -96,7 +96,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
     boxSizing: "border-box" as const,
   };
   const buttonStyle = {
-    textAlign: "center", 
+    textAlign: "center",
     marginTop: isMobile ? "16px" : "30px",
     backgroundColor: theme[themeMode].custom.primary,
     color: theme[themeMode].custom.text,
@@ -114,16 +114,18 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
     transition: "opacity 1s ease-out, transform 1s ease-out",
   };
 
-const handleViewMore = () => {
-  window.location.href = "/all-projects";
-};
-
-  const handleProjectClick = (project: Project) => {
-    setSelectedProject(project);
+  const handleViewMore = () => {
+    window.location.href = "/all-projects";
   };
 
-  const handleClosePopup = () => {
-    setSelectedProject(null);
+  const handleProjectClick = (project: Project) => {
+    setDialogProject(project);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setDialogProject(null);
   };
 
   return (
@@ -207,119 +209,50 @@ const handleViewMore = () => {
           </Grid>
         ))}
       </Grid>
-        <Button
-          style={buttonStyle as React.CSSProperties}
-          variant="contained"
-          sx={{
-            width: "50%",
-            marginTop: isMobile ? "20px" : "30px",
-            marginBottom: isMobile ? "20px" : "30px",
-            backgroundColor: theme[themeMode].custom.primary,
-            color: theme[themeMode].custom.text,
-            display: "block",
-            margin: "auto",
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor =
-              theme[themeMode].custom.secondary;
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor =
-              theme[themeMode].custom.primary;
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.backgroundColor =
-              theme[themeMode].custom.secondary;
-          }
-          }
-          onBlur={(e) => {
-            e.currentTarget.style.backgroundColor =
-              theme[themeMode].custom.primary;
-          }
-          }
-          onClick={(e) => {
-            e.preventDefault();
-            handleViewMore();
-          }}
-     
+      <Button
+        style={buttonStyle as React.CSSProperties}
+        variant="contained"
+        sx={{
+          width: "50%",
+          marginTop: isMobile ? "20px" : "30px",
+          marginBottom: isMobile ? "20px" : "30px",
+          backgroundColor: theme[themeMode].custom.primary,
+          color: theme[themeMode].custom.text,
+          display: "block",
+          margin: "auto",
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor =
+            theme[themeMode].custom.secondary;
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor =
+            theme[themeMode].custom.primary;
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.backgroundColor =
+            theme[themeMode].custom.secondary;
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.backgroundColor =
+            theme[themeMode].custom.primary;
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          handleViewMore();
+        }}
+      >
+        View More
+      </Button>
 
-          
-        >
-          View More
-        </Button>
-
-      {selectedProject && (
-        <Dialog
-          open={!!selectedProject}
-          onClose={handleClosePopup}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            style: {
-              width: isMobile ? "98vw" : undefined,
-              margin: isMobile ? 4 : undefined,
-            },
-          }}
-        >
-          <DialogTitle>{selectedProject.name}</DialogTitle>
-          <DialogContent>
-            <Typography variant="body1" gutterBottom>
-              {selectedProject.description}
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>Priority:</strong> {selectedProject.priority}
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>Timeline:</strong> {selectedProject.timeline.start} -{" "}
-              {selectedProject.timeline.end}
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>Repository:</strong>{" "}
-              <a
-                href={selectedProject.repository_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ wordBreak: "break-all" }}
-              >
-                {selectedProject.repository_link}
-              </a>
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              <strong>YouTube:</strong>{" "}
-              <a
-                href={selectedProject.youtube_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ wordBreak: "break-all" }}
-              >
-                {selectedProject.youtube_link}
-              </a>
-            </Typography>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
-                marginTop: "20px",
-                justifyContent: isMobile ? "center" : "flex-start",
-              }}
-            >
-              {selectedProject.images.map((image, idx) => (
-                <img
-                  key={idx}
-                  src={image}
-                  alt={`Project ${selectedProject.name} Image ${idx + 1}`}
-                  style={{
-                    width: isMobile ? "80px" : "100px",
-                    height: isMobile ? "80px" : "100px",
-                    borderRadius: "10px",
-                    objectFit: "cover",
-                  }}
-                />
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
+      {/* Use AllProjectsPage dialog logic for project details */}
+      {dialogProject && (
+        <AllProjectsPage
+          themeMode={themeMode}
+          selectedProject={dialogProject}
+          onCloseDialog={handleCloseDialog}
+          dialogOnly
+        />
       )}
     </Container>
   );
