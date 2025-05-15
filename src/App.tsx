@@ -16,6 +16,7 @@ import {
   timelineItemClasses,
 } from "@mui/lab";
 import AllProjectsPage from "./views/AllProjectsPage";
+import Footer from "./components/Footer";
 
 const App: React.FC = () => {
   const themeMode = "dark";
@@ -115,23 +116,7 @@ const App: React.FC = () => {
                   </div>
                 </TimelineContent>
               </TimelineItem>
-              <TimelineItem>
-                <TimelineSeparator>
-                  <TimelineDot sx={TimelineConnectorStyle} />
-                  <TimelineConnector sx={TimelineConnectorStyle} />
-                </TimelineSeparator>
-                <TimelineContent sx={timelineTextStyle}>
-                  <div ref={contactRef}>
-                    <span style={{ fontStyle: "italic" }}>
-                      Contact <span>{"/>"}</span>
-                    </span>
-                    <div style={{ height: "100vh", padding: "50px" }}>
-                      <h2>Contact Section</h2>
-                      <p>This is the contact section.</p>
-                    </div>
-                  </div>
-                </TimelineContent>
-              </TimelineItem>
+              {/* Removed Contact TimelineItem */}
             </Timeline>
           }
         />
@@ -140,6 +125,7 @@ const App: React.FC = () => {
           element={<AllProjectsPage themeMode={themeMode} />}
         />
       </Routes>
+      <Footer themeMode={themeMode} />
     </div>
   );
 };

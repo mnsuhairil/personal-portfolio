@@ -5,6 +5,7 @@ const darkTheme = {
   text: "#ffffffff",
   background: "#1f1f01",
   indicator: "#FFCC00",
+  backgroundOverlay: "rgba(255, 255, 255, 0.4)",
 };
 
 const lightTheme = {
@@ -14,6 +15,7 @@ const lightTheme = {
   text: "#000",
   background: "#fff",
   indicator: "#ccc",
+  backgroundOverlay: "rgba(0, 0, 0, 4)",
 };
 
 const defaultTheme = {
