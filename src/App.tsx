@@ -116,7 +116,6 @@ const App: React.FC = () => {
                   </div>
                 </TimelineContent>
               </TimelineItem>
-              {/* Removed Contact TimelineItem */}
             </Timeline>
           }
         />
@@ -125,6 +124,7 @@ const App: React.FC = () => {
           element={<AllProjectsPage themeMode={themeMode} />}
         />
       </Routes>
+      <div ref={contactRef}></div>
       <Footer themeMode={themeMode} />
     </div>
   );
