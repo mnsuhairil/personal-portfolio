@@ -30,8 +30,8 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
   const [, setProjects] = useState<Project[]>([]);
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const [topProjects, setTopProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [, setDialogOpen] = useState(false);
   const [dialogProject, setDialogProject] = useState<Project | null>(null);
   const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
