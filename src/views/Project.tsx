@@ -138,7 +138,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
         {topProjects.map((project, index) => (
           <Grid
             item
-            key={project.name}
+            // key={project.name}
             xs={12}
             sm={12}
             md={6}
