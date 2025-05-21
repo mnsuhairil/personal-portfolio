@@ -4,6 +4,7 @@ import theme from "../themes/theme";
 import suimage from "./../assets/su-img2.png";
 import { getDatabase, ref, onValue } from "firebase/database";
 import app from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 interface HomePageProps {
   themeMode: "dark" | "light";
@@ -13,14 +14,27 @@ const HomePage: React.FC<HomePageProps> = ({ themeMode }) => {
   const [typedText, setTypedText] = useState("");
   const [hasAnimated, setHasAnimated] = useState(false);
   const [aboutMe, setAboutMe] = useState<string>("");
+  const [profileImage, setProfileImage] = useState<string>("");
 
+  const navigate = useNavigate();
+
+  const handleViewMore = () => {
+      navigate("/all-projects");
+  };
+  
   useEffect(() => {
     const db = getDatabase(app);
     const aboutMeRef = ref(db, "personalAppDatabase/portfolio_web_data/Biodata/about_me");
+    const profileImageRef = ref(db, "personalAppDatabase/portfolio_web_data/Biodata/profile_image");
     onValue(aboutMeRef, (snapshot) => {
-      const value = snapshot.val();
-      setAboutMe("  " + value || "");
-    });
+    const value = snapshot.val();
+    setAboutMe("  " + value || "");
+  });
+
+  onValue(profileImageRef, (snapshot) => {
+    const value = snapshot.val();
+    setProfileImage(value || "");
+  });
   }, []);
 
   useEffect(() => {
@@ -63,7 +77,7 @@ const HomePage: React.FC<HomePageProps> = ({ themeMode }) => {
       <Grid container xs={12} columnGap={6}>
         <Grid item xs={12} sm={12} md={5.1} lg={5.1} sx={{ display: { xs: "block", sm: "block", md: "none", lg:"none" } }}>
           <img
-            src={suimage}
+            src={profileImage || suimage}
             alt="Portfolio"
             style={{
               width: "100%",
@@ -83,13 +97,13 @@ const HomePage: React.FC<HomePageProps> = ({ themeMode }) => {
           <Typography variant="body1" paragraph textAlign={"justify"}>
             {typedText || "Loading..."}
           </Typography>
-          <Button variant="contained" style={buttonStyle} onClick={() => window.location.href = "/all-projects"}>
+          <Button variant="contained" style={buttonStyle} onClick={() => handleViewMore()}>
             View Projects
           </Button>
         </Grid>
         <Grid item xs={12} sm={12} md={5.1} lg={5.1} sx={{ display: { xs: "none", sm: "none", md: "block", lg:"block" } }}>
           <img
-            src={suimage}
+            src={profileImage || suimage}
             alt="Portfolio"
             style={{
               width: "100%",

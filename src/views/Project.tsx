@@ -10,7 +10,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import theme from "../themes/theme";
 import app from "../firebase";
-import AllProjectsPage from "./AllProjectsPage"; // Import the dialog logic
+import AllProjectsPage from "./AllProjectsPage";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectPageProps {
   themeMode: "dark" | "light";
@@ -30,10 +31,10 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
   const [, setProjects] = useState<Project[]>([]);
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const [topProjects, setTopProjects] = useState<Project[]>([]);
-  // const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [, setDialogOpen] = useState(false);
   const [dialogProject, setDialogProject] = useState<Project | null>(null);
   const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>({});
 
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
@@ -95,6 +96,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
     width: "100%",
     boxSizing: "border-box" as const,
   };
+
   const buttonStyle = {
     textAlign: "center",
     marginTop: isMobile ? "16px" : "30px",
@@ -114,8 +116,10 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
     transition: "opacity 1s ease-out, transform 1s ease-out",
   };
 
+  const navigate = useNavigate();
+
   const handleViewMore = () => {
-    window.location.href = "/all-projects";
+    navigate("/all-projects");
   };
 
   const handleProjectClick = (project: Project) => {
@@ -138,11 +142,11 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
         {topProjects.map((project, index) => (
           <Grid
             item
-            // key={project.name}
             xs={12}
             sm={12}
             md={6}
             lg={6}
+            key={project.name}
             style={{
               position: "relative",
               ...(visibleItems.includes(index) ? visibleStyle : hiddenStyle),
@@ -153,12 +157,25 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
             className="image-container"
             onClick={() => handleProjectClick(project)}
           >
-            <div className="image-container" style={{ width: "100%" }}>
+            <div className="image-container" style={{ width: "100%", position: "relative" }}>
+              {!imageLoaded[index] && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: isMobile ? "25vh" : isTablet ? "28vh" : "30vh",
+                    background: "#e0e0e0",
+                    borderRadius: 20,
+                    zIndex: 1,
+                  }}
+                />
+              )}
               <img
                 className="project-image"
-                src={
-                  project.images[0] || "/src/assets/default-project-image.png"
-                }
+                loading="lazy"
+                src={project.images[0] || "/src/assets/default-project-image.png"}
                 alt={project.name}
                 style={{
                   borderRadius: 20,
@@ -169,7 +186,14 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
                   display: "block",
                   margin: "0 auto",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  transition: "opacity 0.5s",
+                  opacity: imageLoaded[index] ? 1 : 0,
+                  position: "relative",
+                  zIndex: 2,
                 }}
+                onLoad={() =>
+                  setImageLoaded((prev) => ({ ...prev, [index]: true }))
+                }
               />
               <div
                 className="overlay"
@@ -183,14 +207,14 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ themeMode }) => {
                   flexDirection: "column",
                   justifyContent: "center",
                   alignItems: "flex-start",
-                  zIndex: 1,
+                  zIndex: 3,
                   width: isMobile ? "80%" : "auto",
                 }}
               >
                 <Typography
                   className="project-title"
                   style={{
-                    zIndex: 1,
+                    zIndex: 4,
                     color: "#ffffff",
                     fontSize: isMobile ? "1rem" : "1.5rem",
                     fontWeight: 600,
