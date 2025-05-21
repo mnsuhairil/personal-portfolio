@@ -13,9 +13,9 @@ import {
   Email,
   Phone,
   LocationOn,
-  Facebook,
-  Twitter,
   GitHub,
+  LinkedIn,
+  YouTube,
 } from "@mui/icons-material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp"; // Add this import
 import theme from "../themes/theme";
@@ -178,13 +178,13 @@ const Footer: React.FC<{ themeMode: "dark" | "light" }> = ({ themeMode }) => {
               </Typography>
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-              <IconButton color="inherit" href="https://facebook.com">
-                <Facebook />
+              <IconButton color="inherit" href="https://youtube.com/@m.nsuhairil8477?si=D1Lt7R2hiUlheNUZ">
+                <YouTube />
               </IconButton>
-              <IconButton color="inherit" href="https://twitter.com">
-                <Twitter />
+              <IconButton color="inherit" href="https://www.linkedin.com/in/mnsuhairil/">
+                <LinkedIn />
               </IconButton>
-              <IconButton color="inherit" href="https://github.com">
+              <IconButton color="inherit" href="https://github.com/mnsuhairil">
                 <GitHub />
               </IconButton>
               <IconButton color="inherit" href={whatsappLink} target="_blank" rel="noopener">
