@@ -65,15 +65,15 @@ const Header: React.FC<HeaderProps> = ({ themeMode, onNavigate }) => {
   const handleNavigate = (section: string) => {
     setDrawerOpen(false);
     if (section === "all-projects") {
-      navigate("/all-projects");
+      navigate("/personal-portfolio/all-projects");
     } else if (section === "home") {
-      navigate("/");
+      navigate("/personal-portfolio/");
     } else if (section === "projects") {
-      navigate("/#projects");
+      navigate("/personal-portfolio/#projects");
     } else if (section === "about") {
-      navigate("/#about");
+      navigate("/personal-portfolio/#about");
     } else if (section === "contact") {
-      navigate("/#contact");
+      navigate("/personal-portfolio/#contact");
     }
     // Optionally call prop for scroll-into-view if provided
     if (onNavigate) onNavigate(section);

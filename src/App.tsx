@@ -39,7 +39,7 @@ const App: React.FC = () => {
     } else if (section === "contact" && contactRef.current) {
       contactRef.current.scrollIntoView({ behavior: "smooth" });
     } else if (section === "all-projects") {
-      navigate("/all-projects");
+      navigate("/personal-portfolio/all-projects");
     }
   };
 
@@ -121,7 +121,7 @@ const App: React.FC = () => {
           }
         />
         <Route
-          path="/all-projects"
+          path="/personal-portfolio/all-projects"
           element={<AllProjectsPage themeMode={themeMode} />}
         />
       </Routes>
